@@ -1,49 +1,60 @@
 # Ilia Muravev
 
-Backend engineer — **Java · Kotlin · Spring Boot · PostgreSQL · Kafka**. Three years on production
-systems in banking, fleet telematics and EdTech, on the parts that have to stay fast and correct under
-load: data, messaging and reporting.
+**Backend engineer · Java & Kotlin · 3+ years in production**
 
-My work code is private. The repositories below are public projects that reproduce the problems I solve
-at work, built the same way: one command to run, green CI, a test for every claim, and every number in
-a README measured by code in the repository.
+I build backend services that have to stay fast and correct under load: databases, messaging and
+reporting. I've worked on a queue-management system for a retail bank's ~140 branches, a fleet
+telematics and dispatch platform, and — currently, at Perfema — an EdTech SaaS where I own features
+end to end, from Kotlin/Java services to the React screens on top of them.
 
-### [ledger](https://github.com/ilia-muravev-dev/ledger) — double-entry payments ledger
+**Looking for** backend or full-stack roles in fintech or other high-load, data-heavy products —
+remote, hybrid or relocation; employment or B2B.
+[LinkedIn](https://www.linkedin.com/in/ilia-muravev/) · ilia.muravev.dev@gmail.com ·
+English C1, Russian native
 
-Java 21 · Spring Boot 3 · PostgreSQL · jOOQ · Kafka · Testcontainers · k6 · Prometheus/Grafana · React
+## Problems I've solved at work
 
-- Idempotent transfers: the key is claimed under a unique index before any account lock, so 20
-  concurrent requests with one key move money once
-- Pessimistic (ordered `FOR UPDATE`) and optimistic (versioned, jittered retries) engines behind one
-  interface, the same concurrency tests run against both, and a benchmark of the trade-off.
-  Removing the lock order makes the tests fail with `deadlock detected`
-- Transactional outbox → Kafka → a statement read model that tolerates duplicates and reordering;
-  multi-currency transfers through FX position accounts with a stored rate snapshot
-- Load-tested at 365 req/s with 0 % errors; the first run showed the read model 30 s behind, fixed with
-  set-based batch projection (p99 lag 0.24 s)
-- Found a PostgreSQL internal error (`new multixact has more than one updating member`) under
-  contention and worked around it — written up in [#26](https://github.com/ilia-muravev-dev/ledger/issues/26)
+The code is private, the numbers are from production.
 
-### More
+- **A slow aggregate endpoint** — replaced an N+1 walk over the organisation tree with a recursive CTE,
+  a partial index and DTO projections: p95 **1.8 s → 236 ms**, pool waits 18 → 0, ~2,300 rps sustained
+- **Duplicate emails** — moved notifications onto a transactional outbox with a natural dedupe key:
+  **~9 duplicates a week → 0**, and nothing lost on a crash between commit and send
+- **Tables growing by ~7M rows a month** — monthly partitioning with scheduled creation and retention:
+  a month of data **3.4 s → 290 ms**
+- **Nightly sync between two databases** — Debezium CDC with idempotent, versioned upserts:
+  replication lag **hours → seconds**
+- **Analytics on the transactional database** — a ClickHouse reporting layer fed from the event
+  stream: a 30-day fleet report **~38 s → 2.4 s**
+- **Per-request user lookups** — Keycloak 26 with custom SPI (protocol mapper + user storage
+  provider) putting the domain user and roles into the JWT: average response time **~18 ms lower**
+- **Bank reports timing out** — a dedicated pool with statement timeouts and streamed exports:
+  **~15 gateway timeouts a week → 0**
 
-| | What it is | How the claim is proven |
-| --- | --- | --- |
-| [**slotlock**](https://github.com/ilia-muravev-dev/slotlock) | The same concurrency focus in a booking domain (NestJS, Prisma, Postgres, BullMQ): a reservation API that cannot double-book, with idempotency keys, ordered webhooks, expiring holds and an outbox | Five locking strategies — advisory lock, `FOR UPDATE`, optimistic, `SERIALIZABLE`, GiST exclusion — raced by k6 and judged from the database: 0 double bookings each; the `naive` control double-books 18 times in 20 s |
-| [**single-flight-auth**](https://github.com/ilia-muravev-dev/single-flight-auth) · [npm](https://www.npmjs.com/package/single-flight-auth) | Zero-dependency TypeScript library: one access-token refresh per tab *and across tabs* (Web Locks, `localStorage` lease fallback, BroadcastChannel) | Playwright opens five tabs against a rotating-refresh-token server: 5 refresh calls and 4 tabs logged out without it, 1 call and 0 logouts with it |
-| [**second-opinion**](https://github.com/ilia-muravev-dev/second-opinion) | A GitHub Action that reviews pull requests: deterministic checks, a model review with a strict schema, and a second pass that verifies every finding | Scored on real pull requests with planted defects (94 cases, 21 mutation operators), with precision and recall in the README |
-| [**fieldwise**](https://github.com/ilia-muravev-dev/fieldwise) | Schema-driven document extraction (FastAPI, structured model output, pgvector, Next.js review UI) with a per-field eval harness | Strict field accuracy 84.5 % → 91.1 % between prompt versions on held-out receipts, from committed eval reports |
+## Public projects
 
-### Stack
+Built the way I work: one command to run, CI on every push, a test for every claim.
 
-**Backend:** Java 17/21, Kotlin, Spring Boot 3, Spring Security, JPA/Hibernate, jOOQ, JdbcTemplate, Ktor ·
-**Data:** PostgreSQL, ClickHouse, Redis, Flyway · **Messaging:** Kafka, RabbitMQ, ActiveMQ Artemis,
-Debezium CDC, transactional outbox · **Security:** Keycloak (custom SPI), OAuth2/OIDC ·
-**Ops:** Docker, Kubernetes, GitLab CI, GitHub Actions, Prometheus, Grafana, OpenTelemetry, k6 ·
-**Frontend:** React, TypeScript
+**[ledger](https://github.com/ilia-muravev-dev/ledger)** — a double-entry payments ledger
+(Java 21, Spring Boot, PostgreSQL, jOOQ, Kafka, React). Idempotent transfers; pessimistic and
+optimistic locking behind one interface, with the same concurrency tests and a benchmark for both;
+a transactional outbox to Kafka and a read model that tolerates duplicates and reordering;
+multi-currency transfers; k6 load tests and a Grafana dashboard. Under load it hit a PostgreSQL bug
+that is fixed upstream but not yet released — reproduced in plain SQL and worked around
+([#26](https://github.com/ilia-muravev-dev/ledger/issues/26)).
 
-Things these repositories taught me: lock in one global order or concurrent transfers deadlock; an
-exclusion constraint needs `INSERT … ON CONFLICT` or concurrent inserters deadlock on each other; a
-consumer that is correct can still be the bottleneck; and a number nobody can regenerate is a rumour.
+- **[slotlock](https://github.com/ilia-muravev-dev/slotlock)** — a booking API that cannot double-book,
+  five locking strategies raced under k6 (TypeScript, NestJS, PostgreSQL)
+- **[single-flight-auth](https://github.com/ilia-muravev-dev/single-flight-auth)** — an npm library
+  that refreshes an access token once across all browser tabs
+- **[second-opinion](https://github.com/ilia-muravev-dev/second-opinion)** — a pull-request reviewer
+  that verifies its own findings and is scored on PRs with planted defects
+- **[fieldwise](https://github.com/ilia-muravev-dev/fieldwise)** — document extraction with a per-field
+  evaluation harness
 
-[LinkedIn](https://www.linkedin.com/in/ilia-muravev/) · ilia.muravev.dev@gmail.com · open to remote,
-relocation and B2B
+## Stack
+
+**Java 17/21, Kotlin** · Spring Boot, Spring Security, JPA/Hibernate, jOOQ, JdbcTemplate, Ktor ·
+**PostgreSQL**, ClickHouse, Redis, Flyway · **Kafka**, RabbitMQ, ActiveMQ Artemis, Debezium ·
+Keycloak, OAuth2/OIDC · Docker, Kubernetes, GitLab CI · Prometheus, Grafana, OpenTelemetry, k6 ·
+JUnit 5, Testcontainers · React, TypeScript
