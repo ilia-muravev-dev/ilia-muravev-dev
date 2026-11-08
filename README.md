@@ -20,7 +20,7 @@ Open to backend or full-stack roles in fintech and high-load products — remote
 - **[single-flight-auth](https://github.com/ilia-muravev-dev/single-flight-auth)** — npm library: one token refresh across all browser tabs
 - **[second-opinion](https://github.com/ilia-muravev-dev/second-opinion)** — PR reviewer scored on pull requests with planted defects
 - **[fieldwise](https://github.com/ilia-muravev-dev/fieldwise)** — document extraction with a per-field evaluation harness
-- **[Chorelet](https://apify.com/chorelet)** — public-data scrapers on Apify (apps, jobs, markets, events, social) that I build and run
+- **[Chorelet](https://chorelet.app)** — public-data scrapers on [Apify](https://apify.com/chorelet) (apps, jobs, markets, events, social) that I build and run
 
 ## Stack
 
