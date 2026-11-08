@@ -7,6 +7,7 @@ Open to backend or full-stack roles in fintech and high-load products — remote
 ## Selected work
 
 - Real-time vehicle positions over WebSocket, filtered by map viewport and access rights, for hundreds of concurrent connections
+- Real-time dashboards for a bank's ~140 branches: queue state, waiting and service times, operator workload, drill-down to a single ticket, regional time zones
 - Bank report timeouts **~15/week → 0**: dedicated connection pool, statement timeouts, streamed exports
 - Write-endpoint p95 **−37%** by moving event fan-out to a bounded executor with caller-runs back-pressure
 - Reliable JMS flows: idempotent consumers, redelivery with backoff, DLQ with queue-depth alerts
