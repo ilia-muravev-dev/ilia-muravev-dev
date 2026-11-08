@@ -6,12 +6,11 @@ Open to backend or full-stack roles in fintech and high-load products — remote
 
 ## Selected work
 
-- p95 **1.8 s → 236 ms** on an organisation aggregate endpoint: recursive CTE, partial index, DTO projections
-- Duplicate emails **~9/week → 0** with a transactional outbox
-- Monthly queries **3.4 s → 290 ms** after partitioning tables growing by ~7M rows a month
-- Replication lag **hours → seconds** by replacing nightly sync with Debezium CDC
-- 30-day fleet report **38 s → 2.4 s** on a ClickHouse reporting layer
-- Keycloak 26 custom SPI putting domain roles into the JWT, **−18 ms** average response time
+- Real-time vehicle positions over WebSocket, filtered by map viewport and access rights, for hundreds of concurrent connections
+- Bank report timeouts **~15/week → 0**: dedicated connection pool, statement timeouts, streamed exports
+- Write-endpoint p95 **−37%** by moving event fan-out to a bounded executor with caller-runs back-pressure
+- Reliable JMS flows: idempotent consumers, redelivery with backoff, DLQ with queue-depth alerts
+- Team observability: Micrometer, OpenTelemetry tracing, structured logs into Loki, Grafana dashboards and alerts
 
 ## Projects
 
